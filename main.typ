@@ -16,7 +16,7 @@
 }
 
 
-= Lit Review
+= Transferability of PDE-discovery across physical regimes
 
 Introduction
 - Motivate why transferability matters
@@ -32,7 +32,10 @@ Luo et al. 2025 shows how methods of solving PDEs have evolved over time. "Class
 
 
 == Inverse Problems
-The Hadamard criterion for determining whether a particular inverse problem is "well-posed" requires solution existence, uniqueness, and stability; otherwise, it is considered "ill-posed". Inverse problems often fail the third condition, stability, as the behavior of several systems is very sensitive to various parameters; for inverse problems, this indicates that small perturbations in the solution operator (inverse operator) can lead to arbitrarily large variations in the inferred system parameters. For the solution operator, we can compute a condition number given a general $p$-norm (hence, we may associate this number to the problem):
+// add potential visual
+The Hadamard criterion for determining whether a particular inverse problem is "well-posed" requires solution existence, uniqueness, and stability; otherwise, it is considered "ill-posed". Inverse problems often fail the third condition, stability, as the behavior of several systems is very sensitive to various parameters; for inverse problems, this indicates that small perturbations in the solution operator (inverse operator) can lead to arbitrarily large variations in the inferred system parameters. To visualize this, consider we collect data $D$, and we are trying to recover the solution operator $s$ given the system 
+
+For the solution operator, we can compute a condition number given a general $p$-norm (hence, we may associate this number to the problem):
 
 $ kappa (A) = ||A^(-1)||_p dot ||A||_p $
 
@@ -51,15 +54,23 @@ Thus, for a well-conditioned problem (low $kappa$), a backward stable algorithm 
 
 === Regularization Methods
 
-To combat Hadamard instability, obtain meaningful results from observable-sensitive quantities, and also to prevent overfitting, inverse problems must be _regularized_ by modifying the original equations. Common examples include Tikhonov/ridge regularization, truncated SVD (singular value decomposition), and LASSO (least absolute shrinkage and selection operator). Modern methods include [TODO]. In general usage of least-squares, regularization methods are approached as an extra term in the loss function.
+With regularization, we may combat Hadamard instability and prevent overfitting. For the latter, parsimony
+- prevent 
+- obtain meaningful results from
 
-$ L(bvec(w)) = ||A bvec(w) - bvec(w)||^2_2 + lambda R(bvec(w)) $
+obtain meaningful results from observable-sensitive quantities, and also to prevent overfitting, inverse problems must be _regularized_ by modifying the original equations. Common examples include Tikhonov/ridge regularization, truncated SVD (singular value decomposition), and LASSO (least absolute shrinkage and selection operator). Modern methods include [TODO]. In general usage of least-squares, regularization methods are approached as an extra term in the loss function.
+
+$ L(bvec(w)) = ||A bvec(w) - bvec(b)||^2_2 + lambda R(bvec(w)) $
 
 // basically ridge regularization tries to minimize slope (so the resulting model is less sensitive to the input variable -- think about it)
 
 For example, LASSO regularization adopts an $L_1$ norm with $R(bvec(w)) = lambda ||w||_1$, corresponding to a Laplace prior on $bvec(w)$. This type of regularization is often used if we believe the resulting model should have only a small subset of features.
 
 These extra regularization terms introduce a _prior_ 
+
+Regularization acts in _spectral coordinates_. Tikhonov multiplies each SVD mode by $phi_i (lambda)=sigma_i/(sigma_i^2+lambda)$; truncated SVD applies a hard gate. Thus regularization is best understood as a spectral filter that damps small singular-value modes — the modes most contaminated by noise. This spectral view explains both the mathematical role of $lambda$ and heuristics for choosing $lambda$ (Picard/L-curve/GCV).
+
+// Viewed spectrally, regularization is simply modal filtering: SVD diagonalizes the action of an operator between domain and codomain and exposes the small singular-value modes that amplify noise. Tikhonov and truncated-SVD are different filter prescriptions; L1-based sparsity acts in coefficient space and therefore benefits from SVD/POD preconditioning to reduce correlation and improve identifiability. These connections explain why spectral diagnostics (Picard plots, singular-value decay) are indispensable in designing stable, parsimonious PDE discovery workflows.
 
 === Sparsity
 
