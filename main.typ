@@ -87,15 +87,19 @@ The Hadamard criterion for determining whether a particular inverse problem is "
 To visualize this, note that the _spectrum_ of our bounded operator $cal(S)$ is as follows.
 
 $
-  sigma(cal(S)) & = {z in CC : (z I - cal(S)) "not invertible"} \
-                & = {z in CC : det(R(z; cal(S))) = 0} quad
+  sigma(cal(S)) & = {z_0 in CC : (z_0 I - cal(S)) "not invertible"} \
+                & = {z_0 in CC : R(z; cal(S)) "has a pole at" z_0} quad
                   "resolvent" R(z; cal(S)) := (z I - cal(S))^(-1)
 $
 
-We can similarly define a _pseudospectrum_ where the resolvent $R(z; cal(S))$ exceeds a norm of $1 / epsilon$, for some arbitrarily small $epsilon$.
+By construction, the resolvent $R(z; cal(S))$ is analytic on the _resolvent set_ $rho(cal(S)) = CC \\ sigma(cal(S))$. Further, we can similarly define a _pseudospectrum_ by loosening the original condition: let the norm of the resolvent be close to an arbitrarily large $1 / epsilon$ (small $epsilon$).
 
-$ sigma_epsilon (cal(S)) = {z in CC : norm(R(z; cal(S))) > 1 / epsilon} $
+$ sigma_epsilon (cal(S)) = {z_0 in CC : norm(R(z_0; cal(S))) > 1 / epsilon} $
 
+The pseudospectrum contains points $z^star$ where the system $(z^star I - cal(S))x=b$ is *ill-conditioned*. Equivalently, given a perturbation $delta cal(S)$ with $norm(delta cal(S)) < 1 / epsilon$, we may also define:
+
+// delta cal(S) looks bad
+$ sigma_epsilon (cal(S)) = {z_0 : z_0 in sigma(cal(S) + delta cal(S))} $
 
 For the solution operator, we can compute a condition number given a general $p$-norm (hence, we may associate this number to the problem):
 
@@ -152,8 +156,6 @@ Discovery of governing equations
 Differential equations are the language of physics: they express how systems change over time, space, or other field-specific parameters. For condensed matter physics in particular, hundreds of papers and datasets on spatiotemporal data have been collected.For example, (?).
 
 === ODE Discovery
-
-=== PDE Discovery
 
 CMP has accumulated hundreds of papers on spatiotemporal data. Take for example, []. First attendants to PDE discovery were []; hinted at PDE discovery.
 
