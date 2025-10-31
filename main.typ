@@ -23,8 +23,8 @@
   all: true,
 ))
 
-// other math
-#let bvec(x) = {
+// bold vec
+#let bv(x) = {
   $upright(bold(#x))$
 }
 
@@ -64,29 +64,52 @@ We will learn the function-to-function mapping, an _operator_, $cal(S)_theta : c
 
 $ f(u_t, dv(u_t, t)) = 0 $
 
-We can train a model to fit $cal(S)_theta$ given samples of $u_0, d$. However, instead of naively fitting the data, we can embed physical constraints into our model, be it soft constraints or direct restrictions via inductive biases. [] was first to realize that you can embed physics in the loss functional $J[hat(u)_t]$ of these $cal(S)_theta$-predicting architectures.
+We can train a model to fit $cal(S)_theta$ given samples of $u_0, d$. However, instead of finding a naive data fit, we can embed physical constraints into our model, be it soft constraints or direct restrictions via inductive biases. This ensures that noise in the observed data does not deteriorate learning, preventing overfitting side-effects.
+
+[insert about bongard and lipson 2007 and 2009 lipson and other guy]
+
+Raissi et al. 2019 was first to realize that you can embed physics in the loss function $J(bv(u))$ of these $cal(S)_theta$-predicting architectures. Raissi et al. define:
+
+$
+  J(bv(u))=sum_"data" norm(hat(bv(u))(bv(x)_j) - hat(bv(u))(bv(x)_j))^2_2 + sum_"virtual" norm(cal(N)(bv(u)(bv(x)_j), bv(x)_j, t))^2_2
+$
+
+While for us, we will be considering _loss functionals_ $J[hat(u)_t]$,
 
 Inverse problems can be categorized further into
 
 Papers that laid the foundation for solving inverse problems include .. . In 2007, Bongard and Lipson gave the first experiment of three methods for solving inverse problems. They introduced three major steps for symbolic regression of nonlinear systems. These are partitioning, automated probing, snipping.
 
-=== Hadamard criteria
+=== Hadamard stability
 
-The Hadamard criterion for determining whether a particular inverse problem is "well-posed" requires solution existence, uniqueness, and stability; otherwise, it is considered "ill-posed". Inverse problems often fail the third condition, stability, as the behavior of several systems is very sensitive to various parameters; for inverse problems, this indicates that small perturbations in the solution operator (inverse operator) can lead to arbitrarily large variations in the inferred system parameters. To visualize this, consider we collect data $D$, and we are trying to recover the solution operator $s$ given the system
+The Hadamard criterion for determining whether a particular inverse problem is "well-posed" requires solution existence, uniqueness, and stability; otherwise, it is considered "ill-posed". Inverse problems often fail the third condition, stability, as the behavior of several systems is very sensitive to various parameters; for inverse problems, this indicates that small perturbations in the solution operator (inverse operator) can lead to arbitrarily large variations in the inferred system parameters.
+
+To visualize this, note that the _spectrum_ of our bounded operator $cal(S)$ is as follows.
+
+$
+  sigma(cal(S)) & = {z in CC : (z I - cal(S)) "not invertible"} \
+                & = {z in CC : det(R(z; cal(S))) = 0} quad
+                  "resolvent" R(z; cal(S)) := (z I - cal(S))^(-1)
+$
+
+We can similarly define a _pseudospectrum_ where the resolvent $R(z; cal(S))$ exceeds a norm of $1 / epsilon$, for some arbitrarily small $epsilon$.
+
+$ sigma_epsilon (cal(S)) = {z in CC : norm(R(z; cal(S))) > 1 / epsilon} $
+
 
 For the solution operator, we can compute a condition number given a general $p$-norm (hence, we may associate this number to the problem):
 
-$ kappa (A) = ||A^(-1)||_p dot ||A||_p $
+$ kappa (A) = norm(A^(-1))_p dot norm(A)_p $
 
 A given problem with a low condition number $kappa$ is said to be well-conditioned (and vice-versa). For most inverse problems, $kappa$ is very high; i.e. its outputs (system parameters) are very sensitive to its inputs (observables). These results motivate the need for regularization methods, part of the next section in this review.
 
 To solve a given inverse problem, an algorithm may be developed: it will be called _backward stable_ if it produces exact solutions to two similar, perturbed inputs (observables), $x$ and $tilde(x)$. Specifically,
 
-$ |x - tilde(x)| <= O(epsilon_m) $
+$ norm(x - tilde(x)) <= O(epsilon_m) $
 
 The _backward error_ is related to the _forward error_ associated with our given problem. From our earlier condition number $kappa$ of the problem, we know that
 
-$ |x - x_"true" | <= O(kappa dot epsilon_m) $
+$ norm(x - x_"true") <= O(kappa dot epsilon_m) $
 
 Thus, for a well-conditioned problem (low $kappa$), a backward stable algorithm will produce an accurate result.
 
@@ -99,11 +122,11 @@ With regularization, we may combat Hadamard instability and prevent overfitting.
 
 obtain meaningful results from observable-sensitive quantities, and also to prevent overfitting, inverse problems must be _regularized_ by modifying the original equations. Common examples include Tikhonov/ridge regularization, truncated SVD (singular value decomposition), and LASSO (least absolute shrinkage and selection operator). Modern methods include [TODO]. In general usage of least-squares, regularization methods are approached as an extra term in the loss function.
 
-$ L(bvec(w)) = ||A bvec(w) - bvec(b)||^2_2 + lambda R(bvec(w)) $
+$ L(bv(w)) = norm(A bv(w) - bv(b))^2_2 + lambda R(bv(w)) $
 
 // basically ridge regularization tries to minimize slope (so the resulting model is less sensitive to the input variable -- think about it)
 
-For example, LASSO regularization adopts an $L_1$ norm with $R(bvec(w)) = lambda ||w||_1$, corresponding to a Laplace prior on $bvec(w)$. This type of regularization is often used if we believe the resulting model should have only a small subset of features.
+For example, LASSO regularization adopts an $L_1$ norm with $R(bv(w)) = lambda norm(w)_1$, corresponding to a Laplace prior on $bv(w)$. This type of regularization is often used if we believe the resulting model should have only a small subset of features.
 
 These extra regularization terms introduce a _prior_
 
@@ -139,13 +162,6 @@ However, it With the goal of discovering governing theories with the data, resea
 In 2017, Rudy, Brunton, Proctor, and Kutz published a landmark paper opening the field of partial differential equation (PDE) discovery. They had described PDE-FIND, a
 
 Traditionally, a PDE solver
-
-// #align(center)[
-//   #diagram(cell-size: 15mm, $
-//   	G edge(f, ->) edge("d", pi, ->>) & im(f) \
-//   	G slash ker(f) edge("ur", tilde(f), "hook-->")
-//   $)
-// ]
 
 #align(center)[
   #diagram(edge-stroke: 0.75pt, node-stroke: 0.75pt, {
